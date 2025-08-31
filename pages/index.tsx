@@ -1,13 +1,35 @@
-import React from "react";
-import { HeroImage } from "@/constants";
-import Image from "next/image";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import PropertyDetail from "@/components/property/PropertyDetail"; // Assume this component exists
 
-const Home = () => {
+export default function Home() {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await axios.get("/api/properties");
+        setProperties(response.data);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
   return (
-    <main>
-      <Image src={HeroImage} alt="hero_image" width={1608} height={481} />
-    </main>
+    <div className="grid grid-cols-3 gap-4">
+      {properties.map((property) => (
+        <PropertyDetail key={property.id} property={property} />
+      ))}
+    </div>
   );
-};
-
-export default Home;
+}
